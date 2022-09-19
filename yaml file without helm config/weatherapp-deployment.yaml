@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: sre-coding-test
+  labels:
+    app: weather-app
+  name: weather-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: weather-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: weather-app
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: appName
+                operator: In
+                values:
+                - weatherapp
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: appName
+                operator: NotIn
+                values:
+                - weatherapp
+
+      containers:
+      - name: weather-app-newrelic
+        image: bhattd5/weather-app-newrelic:v1
+        ports:
+          - containerPort: 3000
+        env:
+          - name: NEW_RELIC_NO_CONFIG_FILE
+            value: "true"
+          - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+            value: "true"
+          - name: NEW_RELIC_LOG
+            value: "stdout"
+          - name: NEW_RELIC_LICENSE_KEY
+            value: "lickey"
+          - name: NEW_RELIC_APP_NAME
+            value: "weather-app"
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: 200m
+          requests:
+            cpu: 100m
+            memory: 250Mi
+      restartPolicy: Always
+status: {}

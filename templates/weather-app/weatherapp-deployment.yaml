@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.weather_app.name}}
+  name: {{.Values.weather_app.name}}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: {{.Values.weather_app.name}}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: {{.Values.weather_app.name}}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: appName
+                operator: In
+                values:
+                - weatherapp
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: appName
+                operator: NotIn
+                values:
+                - weatherapp
+
+      containers:
+      - name: {{.Values.weather_app.nrappname}}
+        image: {{.Values.weather_app.imageVersion}}
+        ports:
+          - containerPort: 3000
+        env:
+          - name: NEW_RELIC_NO_CONFIG_FILE
+            value: "true"
+          - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+            value: "true"
+          - name: NEW_RELIC_LOG
+            value: "stdout"
+          - name: NEW_RELIC_LICENSE_KEY
+            value: {{.Values.weather_app.nrLicKey}}
+          - name: NEW_RELIC_APP_NAME
+            value: {{.Values.weather_app.name}}
+        resources:
+          limits:
+            memory: {{.Values.weather_app.memoryMax}}
+            cpu: {{.Values.weather_app.cpuMax}}
+          requests:
+            cpu: {{.Values.weather_app.cpuMin}}
+            memory: {{.Values.weather_app.memoryMin}}
+      restartPolicy: Always
+status: {}

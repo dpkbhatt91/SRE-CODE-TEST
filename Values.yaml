@@ -1,0 +1,14 @@
+# This file defines the values for weather app deployment
+weather_app:
+  nrappname: weather-app-helm
+  name: weather-app
+  cpuMin: 100m
+  cpuMax: 300m
+  memoryMin: 100Mi
+  memoryMax: 300Mi
+  imageVersion: bhattd5/weather-app-newrelic:v1
+  nrLicKey: "lickey"
+
+servicePort:
+  port: 3000
+
