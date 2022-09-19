@@ -1,5 +1,5 @@
 # Weather app with Helm
-This example should be used in an kubernetes environment.
+This example should be used in a kubernetes environment.
 
 ## purpose
 with the help of this code, we can install weather app in kubernetes environment and scale it as per our needs, This is also integrated with New Relic APM agent. Please define your licence key in value.yaml and it will start reporting to new relic.
